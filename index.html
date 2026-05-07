@@ -3,174 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thwin Social V4 - Ultimate</title>
-    <style>
-        :root { --bg: #f3f4f6; --card: white; --text: #333; --primary: #e91e63; --secondary: #2196f3; }
-        .dark-mode { --bg: #18191a; --card: #242526; --text: #e4e6eb; --primary: #ff4081; }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: 0.3s; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
-        .container { max-width: 600px; margin: auto; padding: 15px; }
-        
-        /* Search Bar */
-        .search-box { margin-bottom: 15px; }
-        .search-box input { width: 100%; padding: 12px; border-radius: 25px; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); outline: none; background: var(--card); color: var(--text); }
-
-        .post-box, .post { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); animation: fadeIn 0.5s ease; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        input, textarea { width: 100%; background: var(--bg); color: var(--text); border: 1px solid #ddd; border-radius: 10px; padding: 12px; margin-bottom: 10px; outline: none; }
-        
-        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
-        .theme-btn { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 5px 12px; font-size: 14px; border-radius: 20px; }
-        
-        .post h3 { color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
-        .time { font-size: 11px; color: #777; margin-bottom: 10px; }
-        
-        .post-img { width: 100%; border-radius: 12px; margin-top: 10px; cursor: pointer; }
-        .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; display: none; }
-
-        .actions { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; display: flex; gap: 15px; margin-top: 10px; }
-        .action-btn { background: none; color: var(--text); font-size: 14px; display: flex; align-items: center; gap: 5px; padding: 5px; }
-        .action-btn:hover { color: var(--primary); }
-
-        .comment-section { margin-top: 15px; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 12px; }
-        .comment { font-size: 14px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    </style>
+    <title>THWIN 8 - Social App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-    <header>
-        <span>Thwin Social V4</span>
-        <button class="theme-btn" onclick="toggleTheme()">🌓 Theme</button>
-    </header>
-
-    <div class="container">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Post များ ရှာဖွေရန်..." onkeyup="searchPosts()">
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-md mx-auto">
+        <div class="bg-blue-600 p-6 rounded-t-2xl shadow-lg">
+            <h1 class="text-3xl font-bold text-white text-center">THWIN 8</h1>
         </div>
 
-        <div class="post-box">
-            <input type="text" id="userName" placeholder="သင့်နာမည်">
-            <textarea id="postInput" placeholder="ဘာတွေတွေးနေလဲ..."></textarea>
-            
-            <input type="file" id="imageInput" accept="image/*" onchange="previewFile()" style="font-size: 12px; border: none; padding: 0;">
-            <img id="preview" class="preview-img">
-            
-            <button onclick="addPost()" style="width: 100%; margin-top: 10px;">Post တင်မယ် ✨</button>
+        <div class="bg-white p-6 rounded-b-2xl shadow-md mb-6">
+            <input id="userNameInput" type="text" class="w-full p-2 mb-3 border-b focus:outline-none focus:border-blue-500 font-semibold" placeholder="သင့်နာမည် (Username) ရိုက်ပါ...">
+            <textarea id="postInput" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 h-24" placeholder="ယနေ့ ဘာတွေတွေးနေလဲ..."></textarea>
+            <button onclick="savePost()" class="mt-4 w-full bg-blue-500 text-white py-3 rounded-xl hover:bg-blue-600 font-bold shadow-lg">Post တင်မည် ✨</button>
         </div>
 
-        <div id="posts"></div>
+        <div id="postsDisplay" class="space-y-4 pb-10"></div>
     </div>
 
-    <script>
-        let posts = JSON.parse(localStorage.getItem('thwinPostsV4')) || [];
-        let myName = localStorage.getItem('thwinName') || "Thwin User";
-        document.getElementById('userName').value = myName;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let selectedImageData = "";
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcLrSDYuu4mOIP1VdQd3HGmYqjQc1Uw",
+            authDomain: "thwin-social-app.firebaseapp.com",
+            projectId: "thwin-social-app",
+            storageBucket: "thwin-social-app.firebasestorage.app",
+            messagingSenderId: "422543246009",
+            appId: "1:422543246009:web:c4ef5bc4c1e81dfdbb1168"
+        };
 
-        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
-        
-        function previewFile() {
-            const file = document.getElementById('imageInput').files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                selectedImageData = reader.result;
-                const preview = document.getElementById('preview');
-                preview.src = reader.result;
-                preview.style.display = "block";
-            }
-            if (file) reader.readAsDataURL(file);
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        function renderPosts(filterText = "") {
-            const postsContainer = document.getElementById('posts');
-            postsContainer.innerHTML = '';
-            
-            const filteredPosts = posts.filter(p => p.text.toLowerCase().includes(filterText.toLowerCase()) || p.author.toLowerCase().includes(filterText.toLowerCase()));
+        window.savePost = async () => {
+            const userName = document.getElementById('userNameInput').value;
+            const postText = document.getElementById('postInput').value;
+            if (userName.trim() === "" || postText.trim() === "") return alert("အချက်အလက်ပြည့်စုံစွာဖြည့်ပါ");
 
-            [...filteredPosts].reverse().forEach((post, index) => {
-                const originalIndex = posts.indexOf(post);
-                const postDiv = document.createElement('div');
-                postDiv.className = 'post';
-                postDiv.innerHTML = `
-                    <h3>👤 @${post.author}</h3>
-                    <div class="time">🕒 ${post.time}</div>
-                    <p>${post.text}</p>
-                    ${post.image ? `<img src="${post.image}" class="post-img">` : ''}
-                    
-                    <div class="actions">
-                        <button class="action-btn" onclick="likePost(${originalIndex})">❤️ <span>${post.likes}</span></button>
-                        <button class="action-btn" onclick="sharePost(${originalIndex})">🔗 Share</button>
-                        <button class="action-btn" style="color:#f44336; margin-left:auto;" onclick="deletePost(${originalIndex})">🗑️</button>
-                    </div>
+            try {
+                await addDoc(collection(db, "posts"), {
+                    user: userName,
+                    text: postText,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('postInput').value = "";
+            } catch (e) { alert("Firebase Rules ကို စစ်ဆေးပါ"); }
+        };
 
-                    <div class="comment-section">
-                        <div id="comments-${originalIndex}">
-                            ${post.comments.map(c => `<div class="comment"><b>${c.user}:</b> ${c.text}</div>`).join('')}
-                        </div>
-                        <div style="display:flex; gap:5px; margin-top:10px;">
-                            <input type="text" id="cInput-${originalIndex}" placeholder="Comment..." style="margin:0; font-size:12px; padding:8px;">
-                            <button onclick="addComment(${originalIndex})" style="padding:5px 12px; font-size:12px;">Reply</button>
-                        </div>
-                    </div>
-                `;
-                postsContainer.appendChild(postDiv);
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const postsDisplay = document.getElementById('postsDisplay');
+            postsDisplay.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const time = post.timestamp ? new Date(post.timestamp.seconds * 1000).toLocaleString() : "ခုနလေးတင်";
+                postsDisplay.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                        <span class="font-bold text-gray-800">@${post.user}</span>
+                        <p class="text-gray-700 mt-2">${post.text}</p>
+                        <div class="text-[10px] text-gray-400 text-right mt-2">${time}</div>
+                    </div>`;
             });
-        }
-
-        function addPost() {
-            const input = document.getElementById('postInput');
-            const nameInput = document.getElementById('userName');
-            if(input.value.trim() === '' && selectedImageData === '') return;
-            
-            localStorage.setItem('thwinName', nameInput.value);
-            const timeStr = new Date().toLocaleString();
-            
-            posts.push({ author: nameInput.value || "User", text: input.value, image: selectedImageData, likes: 0, time: timeStr, comments: [] });
-            saveAndRefresh();
-            input.value = '';
-            selectedImageData = "";
-            document.getElementById('imageInput').value = "";
-            document.getElementById('preview').style.display = "none";
-        }
-
-        function searchPosts() {
-            const text = document.getElementById('searchInput').value;
-            renderPosts(text);
-        }
-
-        function sharePost(index) {
-            const post = posts[index];
-            const shareText = `Thwin Social Post:\nFrom: @${post.author}\n"${post.text}"`;
-            if (navigator.share) {
-                navigator.share({ title: 'Thwin Social', text: shareText, url: window.location.href });
-            } else {
-                alert("Shared: " + shareText);
-            }
-        }
-
-        function likePost(index) { posts[index].likes++; saveAndRefresh(); }
-        function deletePost(index) { if(confirm("ဖျက်မှာ သေချာလား?")) { posts.splice(index, 1); saveAndRefresh(); } }
-        function addComment(index) {
-            const cInput = document.getElementById(`cInput-${index}`);
-            if(cInput.value.trim() === '') return;
-            posts[index].comments.push({ user: document.getElementById('userName').value || "User", text: cInput.value });
-            saveAndRefresh();
-        }
-
-        function saveAndRefresh() {
-            localStorage.setItem('thwinPostsV4', JSON.stringify(posts));
-            renderPosts();
-        }
-
-        renderPosts();
+        });
     </script>
 </body>
 </html>
